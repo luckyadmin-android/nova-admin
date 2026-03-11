@@ -99,6 +99,14 @@ input, select, textarea { font-family: inherit; }
   background: var(--bg-dark); padding: 1rem; color: var(--text-muted);
   font-weight: 500; font-size: 0.8125rem; text-transform: uppercase; border-bottom: 1px solid var(--border);
 }
+.sort-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-left: 0.4rem; padding: 0.1rem 0.35rem; border-radius: 4px;
+  font-size: 0.875rem; color: var(--text-muted); background: transparent;
+  border: 1px solid transparent; transition: 0.2s; vertical-align: middle; cursor: pointer;
+}
+.sort-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border); }
+.sort-btn.active { color: var(--primary); border-color: var(--primary); background: rgba(201,169,110,0.08); }
 .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: var(--bg-hover); }

@@ -24,6 +24,7 @@ const fStatus = document.getElementById('pStatus');
 const fDesc = document.getElementById('pDesc');
 
 let products = [];
+let sortOrder = null; // null | 'asc' | 'desc'
 
 /* ── Toast Notification ── */
 function showToast(message, type = 'success') {
@@ -57,6 +58,18 @@ async function fetchProducts() {
 }
 
 /* ── Render Table ── */
+/* ── Sort ── */
+window.sortByName = () => {
+  if (sortOrder === null) sortOrder = 'asc';
+  else if (sortOrder === 'asc') sortOrder = 'desc';
+  else sortOrder = null;
+
+  const btn = document.getElementById('sortBtn');
+  btn.textContent = sortOrder === 'asc' ? '↑' : sortOrder === 'desc' ? '↓' : '⇅';
+  btn.classList.toggle('active', sortOrder !== null);
+  renderTable();
+};
+
 function renderTable() {
   let data = [...products];
 
@@ -65,6 +78,10 @@ function renderTable() {
   const st = statusFilter.value;
   if (q) data = data.filter(p => p.name.toLowerCase().includes(q) || p.series.toLowerCase().includes(q));
   if (st) data = data.filter(p => p.status === st);
+
+  // Sort
+  if (sortOrder === 'asc') data.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+  else if (sortOrder === 'desc') data.sort((a, b) => b.name.localeCompare(a.name, 'vi'));
 
   if (data.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Không tìm thấy sản phẩm.</td></tr>`;
