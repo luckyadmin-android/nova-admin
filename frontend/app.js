@@ -14,6 +14,19 @@ const overlay = document.getElementById('productModal'); // both point to same w
 const form = document.getElementById('productForm');
 const modalTitle = document.getElementById('modalTitle');
 
+// Views & Navigation
+const navDashboard = document.getElementById('nav-dashboard');
+const navProducts = document.getElementById('nav-products');
+const viewDashboard = document.getElementById('view-dashboard');
+const viewProducts = document.getElementById('view-products');
+
+// Metrics
+const metricTotal = document.getElementById('metric-total');
+const metricActive = document.getElementById('metric-active');
+const metricDraft = document.getElementById('metric-draft');
+const metricValue = document.getElementById('metric-value');
+let salesChartInstance = null;
+
 // Form fields
 const fId = document.getElementById('pId');
 const fName = document.getElementById('pName');
@@ -51,10 +64,93 @@ async function fetchProducts() {
     if (!res.ok) throw new Error('Network response was not ok');
     products = await res.json();
     renderTable();
+    updateDashboard(); // Update metrics when data changes
   } catch (error) {
     showToast('Lỗi khi tải dữ liệu sản phẩm', 'error');
     console.error(error);
   }
+}
+
+/* ── Dashboard Logic ── */
+function switchView(viewName) {
+  if (viewName === 'dashboard') {
+    navDashboard.classList.add('active');
+    navProducts.classList.remove('active');
+    viewDashboard.classList.remove('view-hidden');
+    viewProducts.classList.add('view-hidden');
+    renderChart(); // Render chart only when view is visible
+  } else {
+    navProducts.classList.add('active');
+    navDashboard.classList.remove('active');
+    viewProducts.classList.remove('view-hidden');
+    viewDashboard.classList.add('view-hidden');
+  }
+}
+
+navDashboard.addEventListener('click', (e) => { e.preventDefault(); switchView('dashboard'); });
+navProducts.addEventListener('click', (e) => { e.preventDefault(); switchView('products'); });
+
+function updateDashboard() {
+  metricTotal.textContent = products.length;
+  metricActive.textContent = products.filter(p => p.status === 'active').length;
+  metricDraft.textContent = products.filter(p => p.status === 'draft').length;
+  
+  const totalVal = products.reduce((sum, p) => sum + (p.price * (p.stock || 0)), 0);
+  metricValue.textContent = formatPrice(totalVal) + ' đ';
+}
+
+function renderChart() {
+  const ctx = document.getElementById('salesChart');
+  if (!ctx) return;
+  
+  if (salesChartInstance) salesChartInstance.destroy(); // destroy old instance to prevent hover glitch
+  
+  // Sample Data for 7 days
+  const labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+  const salesData = [12, 19, 15, 25, 22, 30, 28];
+  const visitorsData = [45, 60, 55, 80, 75, 120, 110];
+
+  salesChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Sản phẩm đã bán',
+          data: salesData,
+          backgroundColor: '#c9a96e',
+          borderRadius: 4
+        },
+        {
+          label: 'Lượt truy cập',
+          data: visitorsData,
+          type: 'line',
+          borderColor: '#10b981',
+          tension: 0.4,
+          borderWidth: 2,
+          pointBackgroundColor: '#10b981'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#a1a1aa', font: { family: 'Inter' } } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#3f3f46' },
+          ticks: { color: '#a1a1aa' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#a1a1aa' }
+        }
+      }
+    }
+  });
 }
 
 /* ── Sort ── */

@@ -6,6 +6,7 @@
   <title>NŌVA Admin – Quản Trị Hệ Thống</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
@@ -17,7 +18,10 @@
       <span class="brand-sub">Admin</span>
     </div>
     <nav class="nav-menu">
-      <a href="#" class="nav-item active">
+      <a href="#" class="nav-item active" id="nav-dashboard">
+        <span class="icon">📊</span> Tổng quan
+      </a>
+      <a href="#" class="nav-item" id="nav-products">
         <span class="icon">📦</span> Sản phẩm
       </a>
       <a href="#" class="nav-item">
@@ -34,12 +38,60 @@
 
   <!-- Main Content -->
   <main class="main-content">
-    <header class="topbar">
-      <h2>Quản lý Sản Phẩm</h2>
-      <div class="topbar-right">
-        <button class="btn-primary" id="addBtn">+ Thêm sản phẩm</button>
+    
+    <!-- DASHBOARD VIEW -->
+    <section id="view-dashboard" class="view-section">
+      <header class="topbar">
+        <h2>Tổng Quan Hệ Thống</h2>
+      </header>
+      <div class="content-body">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-icon">📦</div>
+            <div class="metric-info">
+              <span class="metric-title">Tổng Sản Phẩm</span>
+              <span class="metric-value" id="metric-total">0</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon active-icon">✅</div>
+            <div class="metric-info">
+              <span class="metric-title">Đang Bán</span>
+              <span class="metric-value" id="metric-active">0</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon draft-icon">📝</div>
+            <div class="metric-info">
+              <span class="metric-title">Bản Nháp</span>
+              <span class="metric-value" id="metric-draft">0</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon value-icon">💰</div>
+            <div class="metric-info">
+              <span class="metric-title">Tổng Giá Trị Kho</span>
+              <span class="metric-value" id="metric-value">0 đ</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3>Thống Kê Mô Phỏng (Theo Tuần)</h3>
+          <canvas id="salesChart"></canvas>
+        </div>
       </div>
-    </header>
+    </section>
+
+    <!-- PRODUCTS VIEW -->
+    <section id="view-products" class="view-section view-hidden">
+      <header class="topbar">
+        <h2>Quản lý Sản Phẩm</h2>
+        <div class="topbar-right">
+          <button class="btn-primary" id="addBtn">+ Thêm sản phẩm</button>
+        </div>
+      </header>
+
 
     <div class="content-body">
       <!-- Search & Filter -->
@@ -78,6 +130,8 @@
         </table>
       </div>
     </div>
+      </div>
+    </section>
   </main>
 
   <!-- Product Modal -->
