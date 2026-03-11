@@ -267,10 +267,16 @@ window.deleteProduct = async (id) => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
+  const price = parseInt(fPrice.value) || 0;
+  if (price % 1000 !== 0) {
+    showToast('Giá sản phẩm phải là bội số của 1000 (VD: 50000, 120000)', 'error');
+    return;
+  }
+
   const pData = {
     name: fName.value.trim(),
     series: fSeries.value.trim(),
-    price: parseInt(fPrice.value) || 0,
+    price: price,
     stock: parseInt(fStock.value) || 0,
     status: fStatus.value,
     description: fDesc.value.trim()
