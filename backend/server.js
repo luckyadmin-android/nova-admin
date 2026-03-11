@@ -78,9 +78,55 @@ app.delete('/api/products/:id', async (req, res) => {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING id', [id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
-    res.json({ message: 'Product deleted successfully', id: result.rows[0].id });
   } catch (err) {
     console.error('Error deleting product', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET all orders
+app.get('/api/orders', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM orders ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error('Error fetching orders', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET single order with items
+app.get('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orderResult = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+    if (orderResult.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
+    
+    const itemsResult = await pool.query('SELECT * FROM order_items WHERE order_id = $1', [id]);
+    
+    res.json({
+      ...orderResult.rows[0],
+      items: itemsResult.rows
+    });
+  } catch (err) {
+    console.error('Error fetching order', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT update order status
+app.put('/api/orders/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const result = await pool.query(
+      'UPDATE orders SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating order status', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

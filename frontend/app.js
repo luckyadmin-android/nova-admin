@@ -27,6 +27,13 @@ const metricDraft = document.getElementById('metric-draft');
 const metricValue = document.getElementById('metric-value');
 let salesChartInstance = null;
 
+// Pagination State
+let currentPage = 1;
+const itemsPerPage = 10;
+const pageInfo = document.getElementById('pageInfo');
+const prevBtn = document.getElementById('prevPage');
+const nextBtn = document.getElementById('nextPage');
+
 // Form fields
 const fId = document.getElementById('pId');
 const fName = document.getElementById('pName');
@@ -37,7 +44,19 @@ const fStatus = document.getElementById('pStatus');
 const fDesc = document.getElementById('pDesc');
 
 let products = [];
+let orders = [];
 let sortState = { col: null, dir: null }; // col: 'name'|'price', dir: 'asc'|'desc'
+
+// Orders Modal
+const orderModal = document.getElementById('orderModal');
+const oCustomerName = document.getElementById('oCustomerName');
+const oCustomerPhone = document.getElementById('oCustomerPhone');
+const oDate = document.getElementById('oDate');
+const oTotal = document.getElementById('oTotal');
+const orderItemsBody = document.getElementById('orderItemsBody');
+const oStatusSelect = document.getElementById('oStatusSelect');
+const orderModalTitle = document.getElementById('orderModalTitle');
+let currentOrderId = null;
 
 /* ── Toast Notification ── */
 function showToast(message, type = 'success') {
@@ -67,6 +86,18 @@ async function fetchProducts() {
     updateDashboard(); // Update metrics when data changes
   } catch (error) {
     showToast('Lỗi khi tải dữ liệu sản phẩm', 'error');
+    console.error(error);
+  }
+}
+
+async function fetchOrders() {
+  try {
+    const res = await fetch(`${API_BASE}/orders`);
+    if (!res.ok) throw new Error('Network response was not ok');
+    orders = await res.json();
+    renderOrdersTable();
+  } catch (error) {
+    showToast('Lỗi khi tải dữ liệu đơn hàng', 'error');
     console.error(error);
   }
 }
@@ -189,12 +220,23 @@ function renderTable() {
   else if (sortState.col === 'price')
     data.sort((a, b) => sortState.dir === 'asc' ? a.price - b.price : b.price - a.price);
 
-  if (data.length === 0) {
+  // Pagination
+  const totalPages = Math.ceil(data.length / itemsPerPage) || 1;
+  if (currentPage > totalPages) currentPage = totalPages;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
+
+  // Update Pagination Controls
+  pageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+  prevBtn.disabled = currentPage === 1;
+  nextBtn.disabled = currentPage === totalPages;
+
+  if (paginatedData.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Không tìm thấy sản phẩm.</td></tr>`;
     return;
   }
 
-  tableBody.innerHTML = data.map(p => `
+  tableBody.innerHTML = paginatedData.map(p => `
     <tr>
       <td style="color:var(--text-muted)">#${p.id}</td>
       <td>
@@ -219,8 +261,100 @@ function renderTable() {
 }
 
 // Re-render on input
-searchInput.addEventListener('input', renderTable);
-statusFilter.addEventListener('change', renderTable);
+searchInput.addEventListener('input', () => { currentPage = 1; renderTable(); });
+statusFilter.addEventListener('change', () => { currentPage = 1; renderTable(); });
+
+prevBtn.addEventListener('click', () => {
+  if (currentPage > 1) { currentPage--; renderTable(); }
+});
+nextBtn.addEventListener('click', () => {
+  currentPage++; renderTable();
+});
+
+/* ── Orders Logic ── */
+function getStatusLabel(status) {
+  const map = {
+    'pending': 'Chờ xác nhận',
+    'processing': 'Đang xử lý',
+    'shipped': 'Đang giao',
+    'completed': 'Hoàn thành',
+    'cancelled': 'Đã hủy'
+  };
+  return map[status] || status;
+}
+
+function renderOrdersTable() {
+  const tbody = document.getElementById('ordersBody');
+  if (orders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Chưa có đơn hàng nào.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td style="color:var(--text-muted)">#${o.id}</td>
+      <td style="font-weight:600;color:var(--text)">${o.customer_name}</td>
+      <td>${o.customer_phone}</td>
+      <td>${new Date(o.created_at).toLocaleDateString('vi-VN')}</td>
+      <td style="font-weight:600;color:var(--primary)">${formatPrice(o.total_amount)}</td>
+      <td><span class="badge ${o.status}">${getStatusLabel(o.status)}</span></td>
+      <td style="text-align:right">
+        <button class="btn-ghost" onclick="viewOrder(${o.id})" style="padding: 0.3rem 0.8rem; font-size: 0.8125rem;">Chi tiết</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+window.viewOrder = async (id) => {
+  try {
+    const res = await fetch(`${API_BASE}/orders/${id}`);
+    if (!res.ok) throw new Error('Fetch failed');
+    const orderData = await res.json();
+    
+    currentOrderId = id;
+    orderModalTitle.textContent = `Chi Tiết Đơn Hàng #${id}`;
+    oCustomerName.textContent = orderData.customer_name;
+    oCustomerPhone.textContent = orderData.customer_phone;
+    oDate.textContent = new Date(orderData.created_at).toLocaleString('vi-VN');
+    oTotal.textContent = formatPrice(orderData.total_amount) + ' đ';
+    oStatusSelect.value = orderData.status;
+
+    orderItemsBody.innerHTML = orderData.items.map(item => `
+      <tr>
+        <td style="font-weight:500;">${item.product_name_at_purchase}</td>
+        <td>${formatPrice(item.price_at_purchase)}</td>
+        <td>x${item.quantity}</td>
+        <td style="text-align:right; font-weight:600; color:var(--primary)">${formatPrice(item.price_at_purchase * item.quantity)}</td>
+      </tr>
+    `).join('');
+
+    orderModal.classList.add('active');
+  } catch (error) {
+    showToast('Lỗi khi tải chi tiết đơn hàng', 'error');
+  }
+};
+
+const closeOrderModal = () => orderModal.classList.remove('active');
+document.getElementById('closeOrderModalBtn').addEventListener('click', closeOrderModal);
+document.getElementById('cancelOrderBtn').addEventListener('click', closeOrderModal);
+
+document.getElementById('saveOrderStatusBtn').addEventListener('click', async () => {
+  if (!currentOrderId) return;
+  const newStatus = oStatusSelect.value;
+  try {
+    const res = await fetch(`${API_BASE}/orders/${currentOrderId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error('Update failed');
+    showToast('Cập nhật trạng thái thành công');
+    closeOrderModal();
+    fetchOrders(); // Refresh table
+  } catch (error) {
+    showToast('Lỗi khi cập nhật trạng thái', 'error');
+  }
+});
 
 /* ── Modal Logic ── */
 document.getElementById('addBtn').addEventListener('click', () => {

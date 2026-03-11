@@ -24,7 +24,7 @@
       <a href="#" class="nav-item" id="nav-products">
         <span class="icon">📦</span> Sản phẩm
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" id="nav-orders">
         <span class="icon">🛒</span> Đơn hàng
       </a>
       <a href="#" class="nav-item">
@@ -129,9 +129,44 @@
           </tbody>
         </table>
       </div>
-    </div>
+      
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <button class="page-btn" id="prevPage" disabled>Trang trước</button>
+        <span class="page-info" id="pageInfo">Trang 1 / 1</span>
+        <button class="page-btn" id="nextPage">Trang sau</button>
       </div>
-    </section>
+      
+    </div>
+  </section>
+
+  <!-- ORDERS VIEW -->
+  <section id="view-orders" class="view-section view-hidden">
+    <header class="topbar">
+      <h2>Quản lý Đơn Hàng</h2>
+    </header>
+
+    <div class="content-body">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã Đơn</th>
+              <th>Khách Hàng</th>
+              <th>SĐT</th>
+              <th>Ngày Đặt</th>
+              <th>Tổng Tiền</th>
+              <th>Trạng Thái</th>
+              <th style="text-align:right">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-muted)">Đang tải dữ liệu...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
   </main>
 
   <!-- Product Modal -->
@@ -184,6 +219,56 @@
       <div class="modal-footer">
         <button class="btn-ghost" id="cancelBtn">Hủy</button>
         <button class="btn-primary" id="saveBtn" form="productForm">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Details Modal -->
+  <div class="modal-overlay" id="orderModal">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 id="orderModalTitle">Chi Tiết Đơn Hàng #</h3>
+        <button class="close-btn" id="closeOrderModalBtn">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="order-info-grid">
+          <div><span class="text-muted">Khách hàng:</span> <strong id="oCustomerName"></strong></div>
+          <div><span class="text-muted">Số điện thoại:</span> <strong id="oCustomerPhone"></strong></div>
+          <div><span class="text-muted">Ngày đặt:</span> <span id="oDate"></span></div>
+          <div><span class="text-muted">Tổng tiền:</span> <strong id="oTotal" class="text-primary"></strong></div>
+        </div>
+        
+        <h4 style="margin: 1.5rem 0 1rem; color: var(--text-muted); font-size: 0.875rem; text-transform: uppercase;">Danh sách sản phẩm</h4>
+        <div class="table-container" style="max-height: 250px; overflow-y: auto;">
+          <table class="data-table" style="font-size: 0.875rem;">
+            <thead>
+              <tr>
+                <th>Tên Sản Phẩm</th>
+                <th>Đơn Giá</th>
+                <th>SL</th>
+                <th style="text-align:right">Thành Tiền</th>
+              </tr>
+            </thead>
+            <tbody id="orderItemsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+        <div class="form-group" style="margin-bottom: 0; display: flex; align-items: center; gap: 1rem; flex-direction: row;">
+          <label style="margin: 0;">Trạng thái:</label>
+          <select id="oStatusSelect" style="width: auto; padding: 0.4rem 0.75rem;">
+            <option value="pending">Chờ xác nhận (Pending)</option>
+            <option value="processing">Đang xử lý (Processing)</option>
+            <option value="shipped">Đang giao (Shipped)</option>
+            <option value="completed">Hoàn thành (Completed)</option>
+            <option value="cancelled">Đã hủy (Cancelled)</option>
+          </select>
+        </div>
+        <div>
+          <button class="btn-ghost" id="cancelOrderBtn">Đóng</button>
+          <button class="btn-primary" id="saveOrderStatusBtn">Cập Nhật</button>
+        </div>
       </div>
     </div>
   </div>
