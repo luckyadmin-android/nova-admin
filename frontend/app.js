@@ -104,22 +104,21 @@ async function fetchOrders() {
 
 /* ── Dashboard Logic ── */
 function switchView(viewName) {
-  if (viewName === 'dashboard') {
-    navDashboard.classList.add('active');
-    navProducts.classList.remove('active');
-    viewDashboard.classList.remove('view-hidden');
-    viewProducts.classList.add('view-hidden');
-    renderChart(); // Render chart only when view is visible
-  } else {
-    navProducts.classList.add('active');
-    navDashboard.classList.remove('active');
-    viewProducts.classList.remove('view-hidden');
-    viewDashboard.classList.add('view-hidden');
-  }
+  navDashboard.classList.toggle('active', viewName === 'dashboard');
+  navProducts.classList.toggle('active', viewName === 'products');
+  document.getElementById('nav-orders').classList.toggle('active', viewName === 'orders');
+
+  viewDashboard.classList.toggle('view-hidden', viewName !== 'dashboard');
+  viewProducts.classList.toggle('view-hidden', viewName !== 'products');
+  document.getElementById('view-orders').classList.toggle('view-hidden', viewName !== 'orders');
+
+  if (viewName === 'dashboard') renderChart();
+  if (viewName === 'orders') fetchOrders();
 }
 
 navDashboard.addEventListener('click', (e) => { e.preventDefault(); switchView('dashboard'); });
 navProducts.addEventListener('click', (e) => { e.preventDefault(); switchView('products'); });
+document.getElementById('nav-orders').addEventListener('click', (e) => { e.preventDefault(); switchView('orders'); });
 
 function updateDashboard() {
   metricTotal.textContent = products.length;
