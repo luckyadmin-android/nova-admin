@@ -3,10 +3,11 @@ services:
   db:
     image: postgres:15-alpine
     container_name: nova_db
+    env_file: .env
     environment:
-      POSTGRES_USER: nova_admin
-      POSTGRES_PASSWORD: novapassword
-      POSTGRES_DB: nova_store
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -19,9 +20,10 @@ services:
     container_name: nova_api
     depends_on:
       - db
+    env_file: .env
     environment:
-      DATABASE_URL: postgres://nova_admin:novapassword@db:5432/nova_store
-      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: ${PORT}
     ports:
       - "3000:3000"
     volumes:
