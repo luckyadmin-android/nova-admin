@@ -24,7 +24,7 @@ const fStatus = document.getElementById('pStatus');
 const fDesc = document.getElementById('pDesc');
 
 let products = [];
-let sortOrder = null; // null | 'asc' | 'desc'
+let sortState = { col: null, dir: null }; // col: 'name'|'price', dir: 'asc'|'desc'
 
 /* ── Toast Notification ── */
 function showToast(message, type = 'success') {
@@ -57,19 +57,27 @@ async function fetchProducts() {
   }
 }
 
-/* ── Render Table ── */
 /* ── Sort ── */
-window.sortByName = () => {
-  if (sortOrder === null) sortOrder = 'asc';
-  else if (sortOrder === 'asc') sortOrder = 'desc';
-  else sortOrder = null;
+window.sortByCol = (col) => {
+  if (sortState.col !== col) {
+    sortState = { col, dir: 'asc' };
+  } else if (sortState.dir === 'asc') {
+    sortState.dir = 'desc';
+  } else {
+    sortState = { col: null, dir: null };
+  }
 
-  const btn = document.getElementById('sortBtn');
-  btn.textContent = sortOrder === 'asc' ? '↑' : sortOrder === 'desc' ? '↓' : '⇅';
-  btn.classList.toggle('active', sortOrder !== null);
+  ['name', 'price'].forEach(c => {
+    const btn = document.getElementById(`sort-${c}`);
+    const active = sortState.col === c;
+    btn.textContent = active ? (sortState.dir === 'asc' ? '↑' : '↓') : '⇅';
+    btn.classList.toggle('active', active);
+  });
+
   renderTable();
 };
 
+/* ── Render Table ── */
 function renderTable() {
   let data = [...products];
 
@@ -80,8 +88,10 @@ function renderTable() {
   if (st) data = data.filter(p => p.status === st);
 
   // Sort
-  if (sortOrder === 'asc') data.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
-  else if (sortOrder === 'desc') data.sort((a, b) => b.name.localeCompare(a.name, 'vi'));
+  if (sortState.col === 'name')
+    data.sort((a, b) => sortState.dir === 'asc' ? a.name.localeCompare(b.name, 'vi') : b.name.localeCompare(a.name, 'vi'));
+  else if (sortState.col === 'price')
+    data.sort((a, b) => sortState.dir === 'asc' ? a.price - b.price : b.price - a.price);
 
   if (data.length === 0) {
     tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Không tìm thấy sản phẩm.</td></tr>`;
