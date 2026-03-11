@@ -131,6 +131,23 @@ app.put('/api/orders/:id/status', async (req, res) => {
   }
 });
 
+// PUT update order customer info
+app.put('/api/orders/:id/customer', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { customer_name, customer_phone } = req.body;
+    const result = await pool.query(
+      'UPDATE orders SET customer_name = $1, customer_phone = $2 WHERE id = $3 RETURNING *',
+      [customer_name, customer_phone, id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error updating customer info', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`NOVA Admin API running on port ${port}`);
 });

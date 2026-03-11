@@ -232,8 +232,11 @@
       </div>
       <div class="modal-body">
         <div class="order-info-grid">
-          <div><span class="text-muted">Khách hàng:</span> <strong id="oCustomerName"></strong></div>
-          <div><span class="text-muted">Số điện thoại:</span> <strong id="oCustomerPhone"></strong></div>
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.5rem;">
+            <button class="btn-ghost" id="editCustomerBtn" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Sửa Thông Tin KH</button>
+          </div>
+          <div><span class="text-muted">Khách hàng:</span> <strong id="oCustomerName"></strong><input type="text" id="oCustomerNameInput" class="search-input" style="display:none; width:100%; margin-top:0.25rem; padding: 0.3rem 0.6rem;" /></div>
+          <div><span class="text-muted">Số điện thoại:</span> <strong id="oCustomerPhone"></strong><input type="text" id="oCustomerPhoneInput" class="search-input" style="display:none; width:100%; margin-top:0.25rem; padding: 0.3rem 0.6rem;" /></div>
           <div><span class="text-muted">Ngày đặt:</span> <span id="oDate"></span></div>
           <div><span class="text-muted">Tổng tiền:</span> <strong id="oTotal" class="text-primary"></strong></div>
         </div>

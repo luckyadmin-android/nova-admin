@@ -313,10 +313,23 @@ window.viewOrder = async (id) => {
     currentOrderId = id;
     orderModalTitle.textContent = `Chi Tiết Đơn Hàng #${id}`;
     oCustomerName.textContent = orderData.customer_name;
+    oCustomerName.style.display = 'inline';
+    document.getElementById('oCustomerNameInput').style.display = 'none';
+    document.getElementById('oCustomerNameInput').value = orderData.customer_name;
+    
     oCustomerPhone.textContent = orderData.customer_phone;
+    oCustomerPhone.style.display = 'inline';
+    document.getElementById('oCustomerPhoneInput').style.display = 'none';
+    document.getElementById('oCustomerPhoneInput').value = orderData.customer_phone;
+
     oDate.textContent = new Date(orderData.created_at).toLocaleString('vi-VN');
     oTotal.textContent = formatPrice(orderData.total_amount) + ' đ';
     oStatusSelect.value = orderData.status;
+    
+    const editBtn = document.getElementById('editCustomerBtn');
+    editBtn.textContent = 'Sửa Thông Tin KH';
+    editBtn.classList.remove('btn-primary');
+    editBtn.classList.add('btn-ghost');
 
     orderItemsBody.innerHTML = orderData.items.map(item => `
       <tr>
@@ -352,6 +365,59 @@ document.getElementById('saveOrderStatusBtn').addEventListener('click', async ()
     fetchOrders(); // Refresh table
   } catch (error) {
     showToast('Lỗi khi cập nhật trạng thái', 'error');
+  }
+});
+
+document.getElementById('editCustomerBtn').addEventListener('click', async function() {
+  const nameInput = document.getElementById('oCustomerNameInput');
+  const phoneInput = document.getElementById('oCustomerPhoneInput');
+  const isEditing = nameInput.style.display === 'block' || nameInput.style.display === 'inline-block' || nameInput.style.display === 'inline';
+
+  if (!isEditing) {
+    // Switch to edit mode
+    oCustomerName.style.display = 'none';
+    nameInput.style.display = 'inline-block';
+    oCustomerPhone.style.display = 'none';
+    phoneInput.style.display = 'inline-block';
+    this.textContent = 'Lưu Thông Tin KH';
+    this.classList.remove('btn-ghost');
+    this.classList.add('btn-primary');
+  } else {
+    // Save changes
+    const newName = nameInput.value.trim();
+    const newPhone = phoneInput.value.trim();
+    if (!newName || !newPhone) {
+      showToast('Tên và SĐT không được để trống', 'error');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/orders/${currentOrderId}/customer`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customer_name: newName, customer_phone: newPhone })
+      });
+      if (!res.ok) throw new Error('Update failed');
+      
+      showToast('Cập nhật thông tin khách hàng thành công');
+      
+      // Update UI
+      oCustomerName.textContent = newName;
+      oCustomerName.style.display = 'inline';
+      nameInput.style.display = 'none';
+      
+      oCustomerPhone.textContent = newPhone;
+      oCustomerPhone.style.display = 'inline';
+      phoneInput.style.display = 'none';
+      
+      this.textContent = 'Sửa Thông Tin KH';
+      this.classList.remove('btn-primary');
+      this.classList.add('btn-ghost');
+      
+      fetchOrders(); // Refresh background table
+    } catch (error) {
+      showToast('Lỗi khi cập nhật thông tin khách hàng', 'error');
+    }
   }
 });
 
