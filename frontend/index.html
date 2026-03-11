@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NŌVA Admin – Quản Trị Hệ Thống</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">NŌVA</span>
+      <span class="brand-sub">Admin</span>
+    </div>
+    <nav class="nav-menu">
+      <a href="#" class="nav-item active">
+        <span class="icon">📦</span> Sản phẩm
+      </a>
+      <a href="#" class="nav-item">
+        <span class="icon">🛒</span> Đơn hàng
+      </a>
+      <a href="#" class="nav-item">
+        <span class="icon">👥</span> Khách hàng
+      </a>
+      <a href="#" class="nav-item">
+        <span class="icon">⚙️</span> Cài đặt
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <h2>Quản lý Sản Phẩm</h2>
+      <div class="topbar-right">
+        <button class="btn-primary" id="addBtn">+ Thêm sản phẩm</button>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <!-- Search & Filter -->
+      <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="Tìm kiếm tên, bút..." class="search-input"/>
+        <select id="statusFilter" class="filter-select">
+          <option value="">Tất cả trạng thái</option>
+          <option value="active">Đang bán (Active)</option>
+          <option value="draft">Bản nháp (Draft)</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên Sản Phẩm / Dòng</th>
+              <th>Giá (VNĐ)</th>
+              <th>Tồn Kho</th>
+              <th>Trạng Thái</th>
+              <th style="text-align:right">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Data injected via JS -->
+            <tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted)">Đang tải dữ liệu...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">Thêm Sản Phẩm</h3>
+        <button class="close-btn" id="closeModalBtn">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm">
+          <input type="hidden" id="pId"/>
+          
+          <div class="form-group">
+            <label>Tên sản phẩm *</label>
+            <input type="text" id="pName" required placeholder="VD: NŌVA Noir"/>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Dòng sản phẩm *</label>
+              <input type="text" id="pSeries" required placeholder="VD: Obsidian Series"/>
+            </div>
+            <div class="form-group">
+              <label>Giá (VNĐ) *</label>
+              <input type="number" id="pPrice" required min="0"/>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tồn kho</label>
+              <input type="number" id="pStock" min="0" value="0"/>
+            </div>
+            <div class="form-group">
+              <label>Trạng thái</label>
+              <select id="pStatus">
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Mô tả chi tiết</label>
+            <textarea id="pDesc" rows="4" placeholder="Nhập mô tả sản phẩm..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="cancelBtn">Hủy</button>
+        <button class="btn-primary" id="saveBtn" form="productForm">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastStack" class="toast-stack"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

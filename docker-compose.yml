@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: nova_db
+    environment:
+      POSTGRES_USER: nova_admin
+      POSTGRES_PASSWORD: novapassword
+      POSTGRES_DB: nova_store
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    container_name: nova_api
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://nova_admin:novapassword@db:5432/nova_store
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/public
+    restart: unless-stopped
+
+volumes:
+  pgdata:
